@@ -1,5 +1,6 @@
 package com.laptop.code.laptop.service;
 
+import com.laptop.code.laptop.Controller.LTController;
 import com.laptop.code.laptop.entity.BranchStockDetailsEntity;
 import com.laptop.code.laptop.entity.VendorDetailsEntity;
 import com.laptop.code.laptop.pojo.*;
@@ -9,18 +10,18 @@ import com.laptop.code.laptop.repository.BranchStockDetailsRepository;
 import com.laptop.code.laptop.repository.NewUserRepository;
 import com.laptop.code.laptop.repository.UserDetailsRepository;
 import com.laptop.code.laptop.repository.VendorDetailsRepository;
-import com.laptop.code.laptop.util.CommonFunction;
+import com.laptop.code.laptop.util.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jdk.jfr.Frequency;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import javax.swing.text.html.Option;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -53,6 +54,90 @@ public class LTService {
 
     @Autowired
     BranchStockDetailsRepository branchStockDetailsRepository;
+    private static Logger logger = LoggerFactory.getLogger(LTController.class);
+
+    //DO Login
+    public StandardResponseMessage doLogin(HttpServletRequest request, HttpServletResponse response, String userId, String pwd){
+//        redisTemplate.opsForValue().set("userid ","EK3008");
+//        System.out.println(redisTemplate.opsForValue().get("userid"));
+        StandardResponseMessage standardResponseMessage=new StandardResponseMessage();
+        try {
+            standardResponseMessage=hasValidUser(response,userId,pwd);
+        }
+        catch (Exception e){
+            standardResponseMessage=DefaultResponseMessage.badRequestResponse();
+            logger.error("Error in Login Service "+e);
+        }
+        return standardResponseMessage;
+    }
+    public StandardResponseMessage hasValidUser(HttpServletResponse response, String userId, String pwd){
+        StandardResponseMessage standardResponseMessage=new StandardResponseMessage();
+        Optional<NewUserEntity> userDetails=newUserRepository.findById(userId);
+        String dbUserId="";
+        String dbPwd="";
+        List<DoLoginResponsePojo> doLoginResponseList=new ArrayList<>();
+        DoLoginResponsePojo doLoginResponsePojo=new DoLoginResponsePojo();
+        if (Validators.hasData(userDetails)) {
+            BranchPojo.branch = userDetails.get().getBranch();
+            dbUserId = userDetails.get().getUserId().toString();
+            dbPwd = userDetails.get().getPwd().toString();
+            if (userId.equals(dbUserId) && pwd.equals(dbPwd)) {
+                doLoginResponsePojo.setUserKey(setUserDetails(response,userDetails));
+                doLoginResponseList.add(doLoginResponsePojo);
+                standardResponseMessage=DefaultResponseMessage.successResponse(doLoginResponseList);
+            }
+            else if(userId.equals(dbUserId) && !pwd.equals(dbPwd)){
+                doLoginResponsePojo.setLoginStatus(Constant.INVALID_PASSWORD);
+                doLoginResponseList.add(doLoginResponsePojo);
+                standardResponseMessage.setSystemMessage(PrincipalConstant.MESSAGE_TYPE_SUCCESS);
+                standardResponseMessage.setSystemMessageType(PrincipalConstant.MESSAGE_TYPE_200);
+                standardResponseMessage.setSuccess(PrincipalConstant.MESSAGE_FALSE);
+                standardResponseMessage.setData(doLoginResponseList);
+            }
+        }
+        else{
+            doLoginResponsePojo.setLoginStatus(Constant.INVALID_USER);
+            doLoginResponseList.add(doLoginResponsePojo);
+            standardResponseMessage.setSystemMessage(PrincipalConstant.MESSAGE_TYPE_SUCCESS);
+            standardResponseMessage.setSystemMessageType(PrincipalConstant.MESSAGE_TYPE_200);
+            standardResponseMessage.setSuccess(PrincipalConstant.MESSAGE_FALSE);
+            standardResponseMessage.setData(doLoginResponseList);
+        }
+
+        return standardResponseMessage;
+    }
+    public String setUserDetails(HttpServletResponse response, Optional<NewUserEntity> userDetails){
+        String userKey = UUID.randomUUID().toString();
+        userKey = userKey.replace("-", "");
+        setCookiesUserIdAndUserKey(response, userDetails.get().getUserId(),userKey);
+        NewUserEntity newUserEntity = new NewUserEntity();
+        newUserEntity.setUserId(userDetails.get().getUserId());
+        newUserEntity.setUserName(userDetails.get().getUserName());
+        newUserEntity.setPwd(userDetails.get().getPwd());
+        newUserEntity.setAdminAccess(userDetails.get().getAdminAccess());
+        newUserEntity.setMailId(userDetails.get().getMailId());
+        newUserEntity.setBranch(userDetails.get().getBranch());
+        newUserEntity.setSwitchBranchName(userDetails.get().getSwitchBranchName());
+        newUserEntity.setCreatedTime(userDetails.get().getCreatedTime());
+        newUserEntity.setUserKey(userKey);
+        newUserEntity.setUpdateTime(new Date());
+        newUserRepository.save(newUserEntity);
+        return userKey;
+    }
+    public void setCookiesUserIdAndUserKey(HttpServletResponse response,String userId,String appKey){
+        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "http://localhost:3008");
+        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "X-PINGOTHER,Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Accept,Authorization,userId");
+        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods","GET,PUT,POST,DELETE,PATCH,OPTIONS");
+        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Credentials", "true");
+
+        Cookie userIdCookieRemove = new Cookie("userId", userId);
+        response.addCookie(userIdCookieRemove);
+        Cookie usertokenCookieRemove = new Cookie("userKey", appKey);
+        response.addCookie(usertokenCookieRemove);
+    }
+    //Do Login
+
+    //////////////////////////////////////////////////////////////
 
     public JSONObject addUser(CreateNewUserPojo createNewUserPojo){
             NewUserEntity newUserEntity = new NewUserEntity();
@@ -110,61 +195,68 @@ public class LTService {
 
 
 
-    public  JSONObject login(HttpServletRequest request,HttpServletResponse response, String userId, String pwd){
-//        redisTemplate.opsForValue().set("userid ","EK3008");
-//        System.out.println(redisTemplate.opsForValue().get("userid"));
-        String stat="Invalid UserId/Pwd";
-        String dbUserId ="";
-        String dbPwd ="";
-        HttpSession session = request.getSession();
-        session.setAttribute("userId",userId);
-        session.setAttribute("pwd",pwd);
-        Optional<NewUserEntity> user=getUser(userId);
-        JSONObject json=new JSONObject();
-        if(user!=null && !user.isEmpty() && user.get().getUserId()!=null && user.get().getPwd()!=null) {
-            BranchPojo.branch=user.get().getBranch();
-             dbUserId=user.get().getUserId().toString();
-             dbPwd = user.get().getPwd().toString();
-                System.out.println(userId+" "+pwd+" db "+dbUserId+dbPwd);
-            if (userId.equals(dbUserId) && pwd.equals(dbPwd)) {
-                System.out.println("enters validation db");
-                stat="OK";
-            }
-        }
-        else{
-            json.put("message","Invalid user");
-        }
-        String userKey ="";
-        System.out.println(stat+ " status ");
-        if(stat.equals("OK")) {
-            String venAppKey = UUID.randomUUID().toString();
-            venAppKey = venAppKey.replace("-", "");
-            System.out.println(venAppKey+" key ");
-
-            testnew(request,response,userId,venAppKey);
-
-             userKey = venAppKey;
-            Optional<NewUserEntity> newUserEntity1=newUserRepository.findById(userId);
-            NewUserEntity newUserEntity=new NewUserEntity();
-            newUserEntity.setUserId(newUserEntity1.get().getUserId());
-            newUserEntity.setUserName(newUserEntity1.get().getUserName());
-            newUserEntity.setPwd(newUserEntity1.get().getPwd());
-            newUserEntity.setAdminAccess(newUserEntity1.get().getAdminAccess());
-            newUserEntity.setMailId(newUserEntity1.get().getMailId());
-            newUserEntity.setBranch(newUserEntity1.get().getBranch());
-            newUserEntity.setSwitchBranchName(newUserEntity1.get().getSwitchBranchName());
-            newUserEntity.setCreatedTime(newUserEntity1.get().getCreatedTime());
-            newUserEntity.setUserKey(venAppKey);
-            newUserEntity.setUpdateTime(new Date());
-            newUserRepository.save(newUserEntity);
-            json.put("message",true);
-            json.put("userKey",venAppKey);
-        }
-        if(userId.equals(dbUserId) && !pwd.equals(dbPwd)){
-            json.put("message","Invalid Password");
-        }
-        return json;
-    }
+//    public  StandardResponseMessage login(HttpServletRequest request,HttpServletResponse response, String userId, String pwd){
+////        redisTemplate.opsForValue().set("userid ","EK3008");
+////        System.out.println(redisTemplate.opsForValue().get("userid"));
+//        StandardResponseMessage standardResponseMessage=new StandardResponseMessage();
+//        try {
+//            String stat = "Invalid UserId/Pwd";
+//            String dbUserId = "";
+//            String dbPwd = "";
+//            HttpSession session = request.getSession();
+//            session.setAttribute("userId", userId);
+//            session.setAttribute("pwd", pwd);
+//            Optional<NewUserEntity> user = getUser(userId);
+//
+//            if (user != null && !user.isEmpty() && user.get().getUserId() != null && user.get().getPwd() != null) {
+//                BranchPojo.branch = user.get().getBranch();
+//                dbUserId = user.get().getUserId().toString();
+//                dbPwd = user.get().getPwd().toString();
+//                System.out.println(userId + " " + pwd + " db " + dbUserId + dbPwd);
+//                if (userId.equals(dbUserId) && pwd.equals(dbPwd)) {
+//                    System.out.println("enters validation db");
+//                    stat = "OK";
+//                }
+//            } else {
+////                json.put("message", "Invalid user");
+//            }
+//            String userKey = "";
+//            System.out.println(stat + " status ");
+//            if (stat.equals("OK")) {
+//                String venAppKey = UUID.randomUUID().toString();
+//                venAppKey = venAppKey.replace("-", "");
+//                System.out.println(venAppKey + " key ");
+//
+//                testnew(request, response, userId, venAppKey);
+//
+//                userKey = venAppKey;
+//                Optional<NewUserEntity> newUserEntity1 = newUserRepository.findById(userId);
+//                NewUserEntity newUserEntity = new NewUserEntity();
+//                newUserEntity.setUserId(newUserEntity1.get().getUserId());
+//                newUserEntity.setUserName(newUserEntity1.get().getUserName());
+//                newUserEntity.setPwd(newUserEntity1.get().getPwd());
+//                newUserEntity.setAdminAccess(newUserEntity1.get().getAdminAccess());
+//                newUserEntity.setMailId(newUserEntity1.get().getMailId());
+//                newUserEntity.setBranch(newUserEntity1.get().getBranch());
+//                newUserEntity.setSwitchBranchName(newUserEntity1.get().getSwitchBranchName());
+//                newUserEntity.setCreatedTime(newUserEntity1.get().getCreatedTime());
+//                newUserEntity.setUserKey(venAppKey);
+//                newUserEntity.setUpdateTime(new Date());
+//                newUserRepository.save(newUserEntity);
+////                json.put("message", true);
+////                json.put("userKey", venAppKey);
+//            }
+//            if (userId.equals(dbUserId) && !pwd.equals(dbPwd)) {
+////                json.put("message", "Invalid Password");
+//            }
+////            standardResponseMessage=DefaultResponseMessage.successResponse()
+//        }
+//        catch (Exception e){
+//            DefaultResponseMessage.badRequestResponse();
+//            logger.error("Error in Login Service "+e);
+//        }
+//        return standardResponseMessage;
+//    }
 
     public JSONObject logout(HttpServletRequest request,HttpServletResponse response){
         String userId=getCookiesUserId(request);
@@ -686,6 +778,18 @@ public class LTService {
             response.put("message ",false);
         }
         return response;
+    }
+    public ResponseEntity<StandardResponseMessage> getResponseMessage(StandardResponseMessage result) {
+        try {
+            if (result.getSystemMessageType() == PrincipalConstant.MESSAGE_TYPE_FAILED)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            else
+                return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("Error occurred in Get ResponseMessage :" + e.getMessage());
+            StandardResponseMessage error = DefaultResponseMessage.internalServerErrorResponse();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 }
 

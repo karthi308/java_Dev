@@ -41,22 +41,22 @@ public class SessionFilter implements Filter {
 
     }
 
-    public void setCorsConfig(ServletRequest req, ServletResponse res){
-//        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "http://localhost:3008");
-//        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers",
-//                "X-PINGOTHER,Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Accept,Authorization,userId");
-//        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods","GET,PUT,POST,DELETE,PATCH,OPTIONS");
-//        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Credentials", "true");
-        HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response = (HttpServletResponse) res;
-
-        response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
-        response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me");
-
-    }
+//    public void setCorsConfig(ServletRequest req, ServletResponse res){
+////        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "http://localhost:3008");
+////        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers",
+////                "X-PINGOTHER,Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Accept,Authorization,userId");
+////        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods","GET,PUT,POST,DELETE,PATCH,OPTIONS");
+////        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Credentials", "true");
+//        HttpServletRequest request = (HttpServletRequest) req;
+//        HttpServletResponse response = (HttpServletResponse) res;
+//
+//        response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+//        response.setHeader("Access-Control-Allow-Credentials", "true");
+//        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+//        response.setHeader("Access-Control-Max-Age", "3600");
+//        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me");
+//
+//    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -122,7 +122,6 @@ public class SessionFilter implements Filter {
 
         String  userId = CommonFunction.getUserId(request);
         String userKey = CommonFunction.getUserKey(request);
-        System.out.println("userKey "+userKey);
         Optional<NewUserEntity> dbResponse = newUserRepository.findById(userId);
         if(userId == null || userKey == null) {
             session.invalidate();
@@ -131,7 +130,6 @@ public class SessionFilter implements Filter {
         if (!dbResponse.isEmpty() && userKey.equals(dbResponse.get().getUserKey())) {
 
             BranchPojo.adminAccess=dbResponse.get().getAdminAccess();
-            System.out.println("enters validation");
             stat=true;
         }
         else{

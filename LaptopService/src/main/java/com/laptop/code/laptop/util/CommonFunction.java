@@ -9,7 +9,6 @@ public class CommonFunction {
 		String userId="";
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
-			System.out.println(cookies.toString()+"these are userid cookies ---erhgrbugy---");
 			for (int i = 0; i < cookies.length; i++) {
 				if (cookies[i].getName().equals("userId")) {
 					userId = cookies[i].getValue();
@@ -21,11 +20,9 @@ public class CommonFunction {
     public static String getUserKey(HttpServletRequest request){
         String userKey="";
         Cookie[] cookies = request.getCookies();
-
 		if (cookies != null) {
-			System.out.println(cookies.toString()+"these are appkey cookies ---erhgrbugy---");
 			for (int i = 0; i < cookies.length; i++) {
-				if (cookies[i].getName().equals("appKey")) {
+				if (cookies[i].getName().equals("userKey")) {
 					userKey = cookies[i].getValue();
 				}
 			}

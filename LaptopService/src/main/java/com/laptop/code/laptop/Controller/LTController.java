@@ -1,7 +1,5 @@
 package com.laptop.code.laptop.Controller;
 
-
-import com.laptop.code.laptop.service.SendMail;
 import com.laptop.code.laptop.pojo.CreateNewUserPojo;
 import com.laptop.code.laptop.entity.NewUserEntity;
 import com.laptop.code.laptop.entity.UserDetailsEntity;
@@ -11,12 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3008")
@@ -24,52 +20,10 @@ public class LTController {
 
     @Autowired
     LTService ltService;
-    @Autowired
-    SendMail sendMail;
-//    @Autowired(required = false)
-//    CreateNewUserPojo createNewUserPojo;
-
-
-    @PostMapping("/parenttestnews")
-    @ResponseBody
-    public void testnew(HttpServletRequest request, HttpServletResponse response, @RequestBody String name) {
-
-        System.out.println("new cookies " + name);
-//        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "http://localhost:3008");
-//        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers",
-//                "X-PINGOTHER,Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Accept,Authorization,userId");
-//        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods",
-//                "GET,PUT,POST,DELETE,PATCH,OPTIONS");
-//        ((HttpServletResponse) response).setHeader("Access-Control-Allow-Credentials", "true");
-//
-//
-//        String userIdCookie = "parentidone12=value; Path=/; Secure; HttpOnly; SameSite=None";
-//        String userTokenCookie = "parentidtwo12=value; Path=/; Secure; HttpOnly; SameSite=None";
-//        response.addHeader(HttpHeaders.SET_COOKIE,userIdCookie);
-//        response.addHeader(HttpHeaders.SET_COOKIE,userTokenCookie);
-//
-//        Cookie userIdCookieRemove = new Cookie("sample", "1231241h3u");
-//        response.addCookie(userIdCookieRemove);
-//        Cookie usertokenCookieRemove = new Cookie("parentidtwo", "value");
-//        response.addCookie(usertokenCookieRemove);
-//        Map<String,String> dd = new HashMap<>();
-//        dd.put("hey","heyy");
-        // return ;
-        ltService.testnew(request, response, "E783", "value");
-    }
-
-
-    //    @PostMapping("/login")
-//    @ResponseBody
     @RequestMapping(value = "/login", method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
-    public JSONObject login(HttpServletRequest request, HttpServletResponse response, @RequestBody CreateNewUserPojo loginDetails) {
-        System.out.println("enters login controller");
-        //ltService.testnew(request,response,"E783","value");
-//         ltService.login(request,response,createNewUserPojo.getUserId().toUpperCase(),createNewUserPojo.getPwd());
-//        System.out.println("userid "+loginDetails.getUserId()+"vhhv "+loginDetails.getPwd());
-        return ltService.login(request, response, loginDetails.getUserId().toUpperCase(), loginDetails.getPwd().toUpperCase());
-
-
+    public ResponseEntity<StandardResponseMessage> login(HttpServletRequest request, HttpServletResponse response, @RequestBody CreateNewUserPojo loginDetails) {
+        StandardResponseMessage result =ltService.doLogin(request, response, loginDetails.getUserId().toUpperCase(), loginDetails.getPwd().toUpperCase());
+        return ltService.getResponseMessage(result);
     }
 
     @RequestMapping(value = "/addUser", method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
