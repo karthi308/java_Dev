@@ -11,18 +11,25 @@ import lombok.Data;
 
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name="user_details_tbl")
 @Entity
-public class UserDetailsEntity implements Serializable {
+public class CustomerDetailsEntity implements Serializable {
 
     @Id
     @Column(name="intake_no")
     private String intakeNo;
+
     @Column(name="name")
     private String name;
+
+    @Column(name="mobile_number")
+    private long mobileNumber;
+
+    @Column(name="alternative_mobile_number")
+    private long alternativeMobileNumber;
 
     @Column(name="address")
     private String address;
@@ -36,8 +43,6 @@ public class UserDetailsEntity implements Serializable {
     @Column(name="pincode")
     private String pincode;
 
-    @Column(name="mobile_number")
-    private long mobileNumber;
 
     @Column(name="mail_id")
     private String mailId;
@@ -46,16 +51,16 @@ public class UserDetailsEntity implements Serializable {
     private String make;
     @Column(name="model")
     private String model;
-    @Column(name="sl_no")
-    private String slNo;
+    @Column(name="laptop_sl_no")
+    private String laptopSlNo;
     @Column(name="bt_sl_no")
-    private String btSlNo;
+    private String batterySlNo;
     @Column(name="with_adapter")
     private boolean withAdapter;
     @Column(name="adapter_sl_no")
     private String adapterSlNo;
     @Column(name="problem")
-    private String problem;
+    private String problemReported;
     @Column(name="damages")
     private String damages;
 
@@ -78,13 +83,8 @@ public class UserDetailsEntity implements Serializable {
     @Column(name="branch")
     private String branch;
 
-    @Column(name="created_time")
-    private Date createdTime;
-
-    @Column(name="updated_time")
-    private Date updatedTime;
-
-
+    @Column(name="others")
+    private String others;
 
 
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class StockListPojo {
+public class StockDetailsPojo {
 
 
     private int stockId;
@@ -22,14 +22,14 @@ public class StockListPojo {
     private String price;
 
     @JsonProperty
-    private String warrntyFromDate;
+    private String warranty;
 
     @JsonProperty
-    private String warrntyToDate;
+    private String transferTo;
+
 
     @JsonProperty
     private String location;
-
 
 
 }

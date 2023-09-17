@@ -42,7 +42,8 @@ public class SendMail {
 
         } catch (MessagingException e) {
             e.printStackTrace();
+            return null;
         }
-        return "Successfully OTP Sent to your"+mailId;
+        return "Successfully OTP Sent to your "+mailId;
     }
     }

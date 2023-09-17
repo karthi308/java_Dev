@@ -7,8 +7,8 @@ import lombok.Data;
 public class DoLoginResponsePojo {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String loginStatus;
+    private String login_status;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String userKey;
+    private String user_key;
 }

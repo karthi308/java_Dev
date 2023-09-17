@@ -42,10 +42,4 @@ public class NewUserEntity implements Serializable {
     @Column(name="user_key")
     private String userKey;
 
-    @Column(name="created_time")
-    private Date createdTime;
-
-    @Column(name="updated_time")
-    private Date updateTime;
-
 }

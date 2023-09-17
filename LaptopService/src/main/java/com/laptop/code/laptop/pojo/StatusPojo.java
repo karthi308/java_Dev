@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
-@Component
 @Data
 public class StatusPojo {
 
@@ -15,7 +14,7 @@ public class StatusPojo {
     private String searchNo;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String mobileNo;
+    private long mobileNo;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String branch;

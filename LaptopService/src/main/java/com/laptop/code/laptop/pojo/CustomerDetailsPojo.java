@@ -4,14 +4,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 @Data
-public class LTPojo {
+public class CustomerDetailsPojo {
 
     private String name;
     private String address;
     private String city;
     private String state;
     private String pincode;
-    private String mobileNumber;
+    private Long mobileNo;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long alternativeMobileNo;
+
     private String mailId;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -46,5 +50,8 @@ public class LTPojo {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private long price;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String others;
 
 }
