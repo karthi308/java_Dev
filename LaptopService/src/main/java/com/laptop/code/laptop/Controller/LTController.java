@@ -97,7 +97,6 @@ public class LTController {
 
     @RequestMapping(value = "/getAllPriceList", method = RequestMethod.GET, produces = {"application/json; charset=utf-8"})
     public JSONObject getAllPriceList() {
-        System.out.println(BranchPojo.branch);
         return ltService.getAllPriceList(BranchPojo.branch);
     }
 

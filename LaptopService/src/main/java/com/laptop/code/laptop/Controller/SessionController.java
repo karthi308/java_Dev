@@ -32,7 +32,7 @@ public class SessionController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<StandardResponseMessage> login(HttpServletResponse response, @RequestBody AddUserPojo loginDetails) {
         try {
-            StandardResponseMessage result = service.doLogin(response, loginDetails.getUserId().toUpperCase(), loginDetails.getPwd().toUpperCase());
+            StandardResponseMessage result = service.doLogin(response, loginDetails.getUserId().toUpperCase(), loginDetails.getPwd());
             return CommonUtil.getReturnResponse(result);
         } catch (Exception e) {
             logger.error("Error occurred in Login Controller :" + e.getMessage());
@@ -41,10 +41,10 @@ public class SessionController {
         }
     }
 
-    @RequestMapping(value = "/logout", method = RequestMethod.DELETE)
-    public ResponseEntity<StandardResponseMessage> logout(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(value = "/logout", method = RequestMethod.PUT)
+    public ResponseEntity<StandardResponseMessage> logout(HttpServletRequest request) {
         try {
-            StandardResponseMessage result = service.logout(request, response);
+            StandardResponseMessage result = service.logout(request);
             return CommonUtil.getReturnResponse(result);
         } catch (Exception e) {
             logger.error("Error occurred in Login Controller :" + e.getMessage());

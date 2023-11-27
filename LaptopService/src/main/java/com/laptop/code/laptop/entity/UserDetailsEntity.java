@@ -1,7 +1,6 @@
 package com.laptop.code.laptop.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,12 +9,11 @@ import lombok.Data;
 
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Data
-@Table(name="new_user_tbl")
+@Table(name="user_details")
 @Entity
-public class NewUserEntity implements Serializable {
+public class UserDetailsEntity implements Serializable {
 
     @Id
     @Column(name="user_id")
@@ -30,16 +28,22 @@ public class NewUserEntity implements Serializable {
     @Column(name="mail_id")
     private String mailId;
 
-    @Column(name="branch")
-    private String branch;
+    @Column(name="branch_name")
+    private String branchName;
 
-    @Column(name="admin_access")
-    private String adminAccess;
+    @Column(name="user_modification_access")
+    private boolean userModificationAccess;
 
-    @Column(name="switch_branch_name")
-    private String switchBranchName;
+    @Column(name="switch_branch_access")
+    private boolean switchBranchAccess;
+
+    @Column(name="vendor_stock_access")
+    private boolean vendorStockAccess;
 
     @Column(name="user_key")
     private String userKey;
+
+    @Column(name="status")
+    private String status;
 
 }

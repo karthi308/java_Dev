@@ -10,4 +10,10 @@ public class DateFormatter {
         String toDate = formatter.format(date);
         return toDate;
     }
+    public static String getYearAndMonth() {
+        Date currentDate = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyMM");
+        String formattedDate = sdf.format(currentDate);
+        return formattedDate;
+    }
 }

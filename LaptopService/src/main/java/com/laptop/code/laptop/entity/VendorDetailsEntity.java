@@ -11,25 +11,34 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name = "vendor_details")
+@Table(name = "vendor_stock_details")
 public class VendorDetailsEntity implements Serializable {
     @Id
     @Column(name = "stock_id")
-    int stock_id;
+    String stockId;
 
     @Column(name = "stock_name")
     String stockName;
 
     @Column(name = "price")
-    String price;
+    int price;
 
     @Column(name = "vendor_name")
     String vendorName;
 
-    @Column(name = "warranty_frm_date")
+    @Column(name = "warranty")
     String warranty;
 
-    @Column(name = "location")
-    String location;
+    @Column(name = "vendor_location")
+    String vendorLocation;
+
+    @Column(name = "status")
+    String status;
+
+    @Column(name = "transferred_to")
+    String transferredTo;
+
+    @Column(name = "year")
+    int year;
 
 }

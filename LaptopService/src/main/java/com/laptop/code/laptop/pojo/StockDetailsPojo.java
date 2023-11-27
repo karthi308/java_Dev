@@ -7,29 +7,33 @@ import lombok.Data;
 public class StockDetailsPojo {
 
 
-    private int stockId;
+    private String intakeNo;
+    
+    private String stockId;
 
-    @JsonProperty
+    
     private String stockName;
 
-    @JsonProperty
+    
     private String vendorName;
 
-    @JsonProperty
+    
     private String branchName;
 
-    @JsonProperty
-    private String price;
+    private String stockStatus;
 
-    @JsonProperty
+    
+    private int price;
+
+    
     private String warranty;
 
-    @JsonProperty
+    
     private String transferTo;
 
 
-    @JsonProperty
-    private String location;
+    
+    private String vendorLocation;
 
 
 }

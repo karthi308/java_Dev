@@ -1,5 +1,6 @@
 package com.laptop.code.laptop.util;
 
+import com.laptop.code.laptop.pojo.MessageResponsePojo;
 import com.laptop.code.laptop.pojo.StandardResponseMessage;
 
 import java.util.ArrayList;
@@ -17,6 +18,17 @@ public class StandardResposneUtil {
         return standardResponse;
 
     }
+    public static StandardResponseMessage successMessage(String message) {
+        MessageResponsePojo messageResponsePojo =new MessageResponsePojo();
+        messageResponsePojo.setMessage(message);
+        StandardResponseMessage standardResponse = new StandardResponseMessage();
+        standardResponse.setSuccess(PrincipalConstant.MESSAGE_TRUE);
+        standardResponse.setSystemMessage(PrincipalConstant.MESSAGE_TYPE_200);
+        standardResponse.setSystemMessageType(PrincipalConstant.MESSAGE_TYPE_SUCCESS);
+        standardResponse.setData(Collections.singletonList(messageResponsePojo));
+        return standardResponse;
+
+    }
     public static StandardResponseMessage noDataResponse() {
         List<?> data =new ArrayList<>();
         StandardResponseMessage standardResponse = new StandardResponseMessage();
@@ -24,6 +36,17 @@ public class StandardResposneUtil {
         standardResponse.setSystemMessage(PrincipalConstant.MESSAGE_TYPE_200);
         standardResponse.setSystemMessageType(PrincipalConstant.MESSAGE_TYPE_SUCCESS);
         standardResponse.setData(data);
+        return standardResponse;
+
+    }
+    public static StandardResponseMessage noDataMessage(String message) {
+        MessageResponsePojo messageResponsePojo =new MessageResponsePojo();
+        messageResponsePojo.setMessage(message);
+        StandardResponseMessage standardResponse = new StandardResponseMessage();
+        standardResponse.setSuccess(PrincipalConstant.MESSAGE_FALSE);
+        standardResponse.setSystemMessage(PrincipalConstant.MESSAGE_TYPE_200);
+        standardResponse.setSystemMessageType(PrincipalConstant.MESSAGE_TYPE_SUCCESS);
+        standardResponse.setData(Collections.singletonList(messageResponsePojo));
         return standardResponse;
 
     }

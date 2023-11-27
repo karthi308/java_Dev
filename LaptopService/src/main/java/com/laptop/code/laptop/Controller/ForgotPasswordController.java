@@ -37,7 +37,7 @@ public class ForgotPasswordController {
     @RequestMapping(value = "/verify/otp", method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
     public ResponseEntity<StandardResponseMessage> getVerifyOtp(@RequestBody OtpPojo otpPojo) {
         try {
-            StandardResponseMessage result = service.getVerifyOtp(otpPojo.getOtp());
+            StandardResponseMessage result = service.verifyOtp(otpPojo.getUserId(), otpPojo.getOtp());
             return CommonUtil.getReturnResponse(result);
         } catch (Exception e) {
             logger.error("Error occurred in verifyOtp :" + e.getMessage());
@@ -47,9 +47,9 @@ public class ForgotPasswordController {
     }
 
     @RequestMapping(value = "/resend/otp", method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
-    public ResponseEntity<StandardResponseMessage> resendOtp() {
+    public ResponseEntity<StandardResponseMessage> resendOtp(@RequestBody AddUserPojo addUserPojo) {
         try {
-            StandardResponseMessage result = service.resendOtp();
+            StandardResponseMessage result = service.resendOtp(addUserPojo.getUserId());
             return CommonUtil.getReturnResponse(result);
         } catch (Exception e) {
             logger.error("Error occurred in verifyOtp :" + e.getMessage());
@@ -71,7 +71,7 @@ public class ForgotPasswordController {
     }
 
     @RequestMapping(value = "/change/password", method = RequestMethod.PUT, produces = {"application/json; charset=utf-8"})
-    public ResponseEntity<StandardResponseMessage> setPassword(HttpServletRequest request, @RequestBody PasswordPojo passwordPojo) {
+    public ResponseEntity<StandardResponseMessage> changePassword(HttpServletRequest request, @RequestBody PasswordPojo passwordPojo) {
         try {
             StandardResponseMessage result = service.changePassword(request, passwordPojo);
             return CommonUtil.getReturnResponse(result);

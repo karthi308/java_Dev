@@ -6,6 +6,7 @@ import com.laptop.code.laptop.pojo.StatusPojo;
 import com.laptop.code.laptop.service.IntakeService;
 import com.laptop.code.laptop.util.CommonUtil;
 import com.laptop.code.laptop.util.StandardResposneUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,8 @@ public class IntakeController {
     private static Logger logger = LoggerFactory.getLogger(IntakeController.class);
 
     @RequestMapping(value = "/add/intake", method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
-    public ResponseEntity<StandardResponseMessage> getIntake(@RequestBody CustomerDetailsPojo customerDetailsPojo) {
-        StandardResponseMessage result =  service.addIntake(customerDetailsPojo);
+    public ResponseEntity<StandardResponseMessage> getIntake(HttpServletRequest request, @RequestBody CustomerDetailsPojo customerDetailsPojo) {
+        StandardResponseMessage result = service.addIntake(request, customerDetailsPojo);
         try {
             return CommonUtil.getReturnResponse(result);
         } catch (Exception e) {
@@ -31,38 +32,56 @@ public class IntakeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    @RequestMapping(value = "get/customer/details/by/Status", method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
-    public ResponseEntity<StandardResponseMessage> getClientDetailsByStatus(@RequestBody StatusPojo statusPojo) {
-        StandardResponseMessage result = service.getByStatus(statusPojo.getStatus());
+
+    @RequestMapping(value = "get/all/customer/details", method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
+    public ResponseEntity<StandardResponseMessage> getAllClientDetails(HttpServletRequest request, @RequestBody StatusPojo statusPojo) {
         try {
+            StandardResponseMessage result = service.getAllCustomerDetails(request, statusPojo.getSearchNo());
             return CommonUtil.getReturnResponse(result);
         } catch (Exception e) {
-            logger.error("Error occurred in Get Client DetailsByStatus Controller :" + e.getMessage());
+            logger.error("Error occurred in getAllClientDetails  Controller :" + e.getMessage());
             StandardResponseMessage error = StandardResposneUtil.internalServerErrorResponse();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
 
     }
-    @RequestMapping(value = "/update/client/details", method = RequestMethod.PUT, produces = {"application/json; charset=utf-8"})
-    public ResponseEntity<StandardResponseMessage> updateStatus(@RequestBody StatusPojo statusPojo) {
-        StandardResponseMessage result =service.updateStatus(statusPojo.getIntakeNo(), statusPojo.getStatus());
+
+    @RequestMapping(value = "get/customer/details/by/mobileNo", method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
+    public ResponseEntity<StandardResponseMessage> getCustomerDetailsByMobileNo(@RequestBody StatusPojo statusPojo) {
         try {
+            StandardResponseMessage result = service.getCustomerDetailsByMobileNo(statusPojo.getMobileNo());
             return CommonUtil.getReturnResponse(result);
         } catch (Exception e) {
-            logger.error("Error occurred in updateStatus Controller :" + e.getMessage());
+            logger.error("Error occurred in getCustomerDetails Controller :" + e.getMessage());
             StandardResponseMessage error = StandardResposneUtil.internalServerErrorResponse();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    @RequestMapping(value = "/update/Rejected/Status", method = RequestMethod.PUT, produces = {"application/json; charset=utf-8"})
-    public ResponseEntity<StandardResponseMessage> updateRejectedStatus(@RequestBody StatusPojo statusPojo) {
-        StandardResponseMessage result = service.updateRejectedStatus(statusPojo.getIntakeNo(), statusPojo.getRejectedReason());
+
+    @RequestMapping(value = "get/customer/details", method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
+    public ResponseEntity<StandardResponseMessage> getCustomerDetails(HttpServletRequest request, @RequestBody StatusPojo statusPojo) {
         try {
+            StandardResponseMessage result = service.getCustomerDetails(request, statusPojo.getStatus());
             return CommonUtil.getReturnResponse(result);
         } catch (Exception e) {
-            logger.error("Error occurred in updateRejectedStatus Controller :" + e.getMessage());
+            logger.error("Error occurred in getCustomerDetails Controller :" + e.getMessage());
             StandardResponseMessage error = StandardResposneUtil.internalServerErrorResponse();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
+
     }
+
+    @RequestMapping(value = "search/customer/details", method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
+    public ResponseEntity<StandardResponseMessage> searchCustomerDetails(HttpServletRequest request, @RequestBody StatusPojo statusPojo) {
+        try {
+            StandardResponseMessage result = service.getCustomerDetails(request, statusPojo.getStatus());
+            return CommonUtil.getReturnResponse(result);
+        } catch (Exception e) {
+            logger.error("Error occurred in getCustomerDetails Controller :" + e.getMessage());
+            StandardResponseMessage error = StandardResposneUtil.internalServerErrorResponse();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+
+    }
+
 }

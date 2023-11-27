@@ -1,27 +1,41 @@
 package com.laptop.code.laptop.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class StatusPojo {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String intakeNo;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String searchNo;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private long mobileNo;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String branch;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String rejectedReason;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String status;
+
+    private String stockId;
+
+    private String stockName;
+
+    private String vendorName;
+
+    private String branchName;
+
+    private long price;
+
+    private String warranty;
+
+    private String transferTo;
+
+    private String location;
+
+    private String finalPrice;
 }

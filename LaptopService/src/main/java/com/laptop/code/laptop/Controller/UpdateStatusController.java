@@ -32,9 +32,35 @@ public class UpdateStatusController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    @RequestMapping(value="/hand/out",method = RequestMethod.PUT, produces = {"application/json; charset=utf-8"})
-    public ResponseEntity<StandardResponseMessage> UpdateHandOutStatus(@RequestBody StatusPojo statusPojo){
-        StandardResponseMessage result = service.UpdateHandOutStatus(statusPojo.getIntakeNo(), statusPojo.getStatus());
+
+
+    @RequestMapping(value = "/update/product/status", method = RequestMethod.PUT, produces = {"application/json; charset=utf-8"})
+    public ResponseEntity<StandardResponseMessage> updateStatus(@RequestBody StatusPojo statusPojo) {
+        StandardResponseMessage result = service.updateStatus(statusPojo.getIntakeNo(), statusPojo.getStatus());
+        try {
+            return CommonUtil.getReturnResponse(result);
+        } catch (Exception e) {
+            logger.error("Error occurred in updateStatus Controller :" + e.getMessage());
+            StandardResponseMessage error = StandardResposneUtil.internalServerErrorResponse();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @RequestMapping(value = "/update/approved/status", method = RequestMethod.PUT, produces = {"application/json; charset=utf-8"})
+    public ResponseEntity<StandardResponseMessage> updateApprovedStatus(@RequestBody StatusPojo statusPojo) {
+        StandardResponseMessage result = service.updateApprovedStatus(statusPojo.getIntakeNo(), statusPojo.getPrice());
+        try {
+            return CommonUtil.getReturnResponse(result);
+        } catch (Exception e) {
+            logger.error("Error occurred in updateStatus Controller :" + e.getMessage());
+            StandardResponseMessage error = StandardResposneUtil.internalServerErrorResponse();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+    @RequestMapping(value = "/update/Rejected/Status", method = RequestMethod.PUT, produces = {"application/json; charset=utf-8"})
+    public ResponseEntity<StandardResponseMessage> updateRejectedStatus(@RequestBody StatusPojo statusPojo) {
+        StandardResponseMessage result = service.updateRejectedStatus(statusPojo.getIntakeNo(), statusPojo.getRejectedReason());
         try {
             return CommonUtil.getReturnResponse(result);
         } catch (Exception e) {
@@ -43,6 +69,19 @@ public class UpdateStatusController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
+
+    @RequestMapping(value = "/hand/out/ready", method = RequestMethod.PUT, produces = {"application/json; charset=utf-8"})
+    public ResponseEntity<StandardResponseMessage> updateHandOutReadyStatus(@RequestBody StatusPojo statusPojo) {
+        StandardResponseMessage result = service.updateHandOutReadyStatus(statusPojo.getIntakeNo());
+        try {
+            return CommonUtil.getReturnResponse(result);
+        } catch (Exception e) {
+            logger.error("Error occurred in updateHandOutReadyStatus Controller :" + e.getMessage());
+            StandardResponseMessage error = StandardResposneUtil.internalServerErrorResponse();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
 
 //    @RequestMapping(value="/fetchUser/details",method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
 //    public JSONObject fetchUserDetails(@RequestBody StatusPojo statusPojo){

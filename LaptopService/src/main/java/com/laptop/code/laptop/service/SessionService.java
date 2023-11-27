@@ -1,32 +1,32 @@
 package com.laptop.code.laptop.service;
 
-import com.laptop.code.laptop.entity.NewUserEntity;
+import com.laptop.code.laptop.entity.UserDetailsEntity;
 import com.laptop.code.laptop.pojo.DoLoginResponsePojo;
 import com.laptop.code.laptop.pojo.StandardResponseMessage;
-import com.laptop.code.laptop.repository.NewUserRepository;
-import com.laptop.code.laptop.util.CommonFunction;
-import com.laptop.code.laptop.util.Constant;
-import com.laptop.code.laptop.util.StandardResposneUtil;
-import com.laptop.code.laptop.util.Validators;
+import com.laptop.code.laptop.repository.UserDetailsRepository;
+import com.laptop.code.laptop.util.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class SessionService {
     @Autowired
-    NewUserRepository newUserRepository;
+    UserDetailsRepository newUserRepository;
+
+    @Autowired
+    CacheUtil cache;
     private static Logger logger = LoggerFactory.getLogger(SessionService.class);
 
     public StandardResponseMessage doLogin(HttpServletResponse response, String userId, String pwd) {
-//        redisTemplate.opsForValue().set("userid ","EK3008");
-//        System.out.println(redisTemplate.opsForValue().get("userid"));
         StandardResponseMessage standardResponseMessage = new StandardResponseMessage();
         try {
             standardResponseMessage = hasValidUser(response, userId, pwd);
@@ -39,53 +39,48 @@ public class SessionService {
 
     public StandardResponseMessage hasValidUser(HttpServletResponse response, String userId, String pwd) {
         StandardResponseMessage standardResponseMessage = new StandardResponseMessage();
-        Optional<NewUserEntity> userDetails = newUserRepository.findById(userId);
+        Optional<UserDetailsEntity> userDetails = newUserRepository.findById(userId);
         String dbUserId = "";
         String dbPwd = "";
-        String branchName = "";
         List<DoLoginResponsePojo> doLoginResponseList = new ArrayList<>();
         DoLoginResponsePojo doLoginResponsePojo = new DoLoginResponsePojo();
         if (Validators.hasData(userDetails)) {
-            branchName = userDetails.get().getBranch();
+            cache.setValue(userDetails.get().getUserId() + "branch", userDetails.get().getBranchName(), 12);
+            cache.setValue(userDetails.get().getUserId() + "details", CommonUtil.getASJsonString(userDetails.get()), 12);
             dbUserId = userDetails.get().getUserId();
             dbPwd = userDetails.get().getPwd();
             if (userId.equals(dbUserId) && pwd.equals(dbPwd)) {
-                doLoginResponsePojo.setUser_key(setUserDetails(response, userDetails, branchName));
+                doLoginResponsePojo.setUser_key(setUserDetails(response, userDetails));
                 doLoginResponseList.add(doLoginResponsePojo);
                 standardResponseMessage = StandardResposneUtil.successResponse(doLoginResponseList);
-            } else if (userId.equals(dbUserId) && !pwd.equals(dbPwd)) {
-                doLoginResponsePojo.setLogin_status(Constant.INVALID_PASSWORD);
-                doLoginResponseList.add(doLoginResponsePojo);
-                standardResponseMessage = StandardResposneUtil.unAuthorizedResponse();
-                standardResponseMessage.setData(doLoginResponseList);
-            }
-        } else {
-            doLoginResponsePojo.setLogin_status(Constant.INVALID_USER);
-            doLoginResponseList.add(doLoginResponsePojo);
-            standardResponseMessage = StandardResposneUtil.unAuthorizedResponse();
-            standardResponseMessage.setData(doLoginResponseList);
-        }
+            } else if (userId.equals(dbUserId) && !pwd.equals(dbPwd))
+                standardResponseMessage = StandardResposneUtil.noDataMessage(Constant.INVALID_PASSWORD);
+        } else
+            standardResponseMessage = StandardResposneUtil.noDataMessage(Constant.INVALID_USER);
+
         return standardResponseMessage;
     }
 
-    public String setUserDetails(HttpServletResponse response, Optional<NewUserEntity> userDetails, String branchName) {
+    public String setUserDetails(HttpServletResponse response, Optional<UserDetailsEntity> userDetails) {
         String userKey = UUID.randomUUID().toString();
         userKey = userKey.replace("-", "");
-        setCookiesUserIdAndUserKey(response, userDetails.get().getUserId(), userKey, branchName);
-        NewUserEntity newUserEntity = new NewUserEntity();
+        setCookiesUserIdAndUserKey(response, userDetails.get().getUserId(), userKey);
+        UserDetailsEntity newUserEntity = new UserDetailsEntity();
         newUserEntity.setUserId(userDetails.get().getUserId());
         newUserEntity.setUserName(userDetails.get().getUserName());
         newUserEntity.setPwd(userDetails.get().getPwd());
-        newUserEntity.setAdminAccess(userDetails.get().getAdminAccess());
+        newUserEntity.setUserModificationAccess(userDetails.get().isUserModificationAccess());
+        newUserEntity.setSwitchBranchAccess(userDetails.get().isSwitchBranchAccess());
+        newUserEntity.setVendorStockAccess(userDetails.get().isVendorStockAccess());
         newUserEntity.setMailId(userDetails.get().getMailId());
-        newUserEntity.setBranch(userDetails.get().getBranch());
-        newUserEntity.setSwitchBranchName(userDetails.get().getSwitchBranchName());
+        newUserEntity.setBranchName(userDetails.get().getBranchName());
         newUserEntity.setUserKey(userKey);
+//        newUserEntity.setUserKey("ca748072ff794576bf5c4515e7bff6c3");
         newUserRepository.save(newUserEntity);
         return userKey;
     }
 
-    public void setCookiesUserIdAndUserKey(HttpServletResponse response, String userId, String appKey, String branchName) {
+    public void setCookiesUserIdAndUserKey(HttpServletResponse response, String userId, String appKey) {
         ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "http://localhost:3008");
         ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers", "X-PINGOTHER,Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Accept,Authorization,userId");
         ((HttpServletResponse) response).setHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH,OPTIONS");
@@ -94,33 +89,25 @@ public class SessionService {
         response.addCookie(setUserIdCookie);
         Cookie setUserTokenCookie = new Cookie("userKey", appKey);
         response.addCookie(setUserTokenCookie);
-        Cookie setBranchCookie = new Cookie("narchb", branchName);
-        response.addCookie(setBranchCookie);
     }
 
-    ///
-    public StandardResponseMessage logout(HttpServletRequest request, HttpServletResponse response) {
+    public StandardResponseMessage logout(HttpServletRequest request) {
         StandardResponseMessage standardResponseMessage = new StandardResponseMessage();
         try {
-            String userId = CommonFunction.getUserId(request);
-            NewUserEntity newUserEntity1 = new NewUserEntity();
-            Optional<NewUserEntity> list = newUserRepository.findById(userId);
+            String userId = request.getHeader(Constant.USER_ID);
+            UserDetailsEntity newUserEntity1 = new UserDetailsEntity();
+            Optional<UserDetailsEntity> list = newUserRepository.findById(userId);
             if (Validators.hasData(list)) {
                 newUserEntity1.setUserId(list.get().getUserId());
                 newUserEntity1.setUserName(list.get().getUserName());
                 newUserEntity1.setPwd(list.get().getPwd());
-                newUserEntity1.setAdminAccess(list.get().getAdminAccess());
-                newUserEntity1.setBranch(list.get().getBranch());
-                newUserEntity1.setSwitchBranchName(list.get().getSwitchBranchName());
+                newUserEntity1.setUserModificationAccess(list.get().isUserModificationAccess());
+                newUserEntity1.setSwitchBranchAccess(list.get().isSwitchBranchAccess());
+                newUserEntity1.setVendorStockAccess(list.get().isVendorStockAccess());
+                newUserEntity1.setBranchName(list.get().getBranchName());
                 newUserEntity1.setUserKey(null);
                 newUserEntity1.setMailId(list.get().getMailId());
                 newUserRepository.save(newUserEntity1);
-                Cookie removeCookiesuserId = new Cookie("userId", "");
-                Cookie removeCookiesuserKey = new Cookie("userKey", "");
-                Cookie removeBranchCookie = new Cookie("narchb", "");
-                response.addCookie(removeBranchCookie);
-                response.addCookie(removeCookiesuserId);
-                response.addCookie(removeCookiesuserKey);
                 standardResponseMessage = StandardResposneUtil.successResponse(Collections.singletonList("Successfully Logged Out"));
             } else
                 standardResponseMessage = StandardResposneUtil.notFound();

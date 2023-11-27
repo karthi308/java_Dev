@@ -2,10 +2,10 @@ package com.laptop.code.laptop.service;
 
 import com.laptop.code.laptop.Controller.LTController;
 import com.laptop.code.laptop.pojo.*;
-import com.laptop.code.laptop.entity.NewUserEntity;
+import com.laptop.code.laptop.entity.UserDetailsEntity;
 import com.laptop.code.laptop.entity.CustomerDetailsEntity;
 import com.laptop.code.laptop.repository.BranchStockDetailsRepository;
-import com.laptop.code.laptop.repository.NewUserRepository;
+import com.laptop.code.laptop.repository.UserDetailsRepository;
 import com.laptop.code.laptop.repository.CustomerDetailsRepository;
 import com.laptop.code.laptop.repository.VendorDetailsRepository;
 import com.laptop.code.laptop.util.*;
@@ -27,7 +27,7 @@ import java.util.*;
 public class LTService {
 
     @Autowired
-    NewUserRepository newUserRepository;
+    UserDetailsRepository newUserRepository;
 
     @Autowired
     OtpPojo otpPojo;
@@ -38,10 +38,7 @@ public class LTService {
     StatusPojo statusPojo;
 
     @Autowired(required = false)
-    NewUserEntity newUserEntity;
-
-    @Autowired(required = false)
-    CommonFunction commonFunction;
+    UserDetailsEntity newUserEntity;
 
     @Autowired
     SendMail sendMail;
@@ -370,17 +367,16 @@ public class LTService {
         public List<CustomerDetailsEntity> getPriceList(String date, String branch){
             StringBuffer sbf = new StringBuffer(date);
             date.replace("/","");
-            System.out.println("length "+date.length());
             if(date.length()!=8){
                 date+="%";
             }
             List<CustomerDetailsEntity> list=null;
-            if(BranchPojo.adminAccess.equals("YES")) {
-                list = userDetailsRepository.getPriceList(date);
-            }
-            else{
-                list = userDetailsRepository.getPriceListByBranch(date,branch);
-            }
+//            if(BranchPojo.adminAccess.equals("YES")) {
+//                list = userDetailsRepository.getPriceList(date);
+//            }
+//            else{
+//                list = userDetailsRepository.getPriceListByBranch(date,branch);
+//            }
             return list;
         }
 
@@ -392,22 +388,21 @@ public class LTService {
             String today=date;
             String month=sbfDate.delete(6, 8).toString()+"%";
             String year=sbfDate.delete(4,8).toString()+"%";
-            System.out.println(today+" "+month+" "+year);
             JSONObject data=new JSONObject();
             JSONObject priceList=new JSONObject();
             List<CustomerDetailsEntity> list=null;
             List<CustomerDetailsEntity> list1=null;
             List<CustomerDetailsEntity> list2=null;
-            if("LSINJ".equals(BranchPojo.branch)){
-                list=userDetailsRepository.getPriceList(today);
-                list1=userDetailsRepository.getPriceList(month);
-                list2=userDetailsRepository.getPriceList(year);
-            }
-            else{
-                list=userDetailsRepository.getPriceListByBranch(today,branch);
-                list1=userDetailsRepository.getPriceListByBranch(month,branch);
-                list2=userDetailsRepository.getPriceListByBranch(year,branch);
-            }
+//            if("LSINJ".equals(BranchPojo.branch)){
+//                list=userDetailsRepository.getPriceList(today);
+//                list1=userDetailsRepository.getPriceList(month);
+//                list2=userDetailsRepository.getPriceList(year);
+//            }
+//            else{
+//                list=userDetailsRepository.getPriceListByBranch(today,branch);
+//                list1=userDetailsRepository.getPriceListByBranch(month,branch);
+//                list2=userDetailsRepository.getPriceListByBranch(year,branch);
+//            }
 
             int todayTotal=getPrice(list);
             int monthTotal=getPrice(list1);
@@ -427,13 +422,10 @@ public class LTService {
 
         for(int i=0;i<length;i++){
             total+=userDetailsEntityList.get(i).getPrice();
-            System.out.println(userDetailsEntityList.get(i).getBranch()+"haci"+json.get(userDetailsEntityList.get(i).getBranch()));
             if(!userDetailsEntityList.get(i).getBranch().equals(json.get(userDetailsEntityList.get(i).getBranch()))){
                 json.put(userDetailsEntityList.get(i).getBranch(),total);
-                System.out.println("hello");
             }
         }
-        System.out.println(total);
         return total;
         }
 //        public JSONObject forgetPassword(HttpServletRequest request,HttpServletResponse res,String userId) {
@@ -517,11 +509,11 @@ public class LTService {
 //        }
 
         public JSONObject getownBranchName(HttpServletRequest request){
-        String userId=CommonFunction.getUserId(request);
+        String userId=request.getHeader(Constant.USER_ID);
         System.out.println("userID "+userId);
         JSONObject response =new JSONObject();
-            Optional<NewUserEntity> list= newUserRepository.findById(userId);
-            response.put("ownBranch",list.get().getBranch());
+            Optional<UserDetailsEntity> list= newUserRepository.findById(userId);
+            response.put("ownBranch",list.get().getBranchName());
             return response;
         }
 //        public JSONObject getBranchName(HttpServletRequest request){
@@ -563,7 +555,6 @@ public class LTService {
 
 
     public Map<String,String> testnew(HttpServletRequest request, HttpServletResponse response,String userId,String appKey){
-        System.out.println("enters cookies settings ");
         ((HttpServletResponse) response).setHeader("Access-Control-Allow-Origin", "http://localhost:3008");
         ((HttpServletResponse) response).setHeader("Access-Control-Allow-Headers",
                 "X-PINGOTHER,Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Accept,Authorization,userId");
@@ -636,7 +627,7 @@ public class LTService {
 
     public JSONObject getUsersList(){
         JSONObject response=new JSONObject();
-        List<NewUserEntity> userList=newUserRepository.findAll();
+        List<UserDetailsEntity> userList=newUserRepository.findAll();
         if(userList!=null){
             response.put("message",true);
             response.put("data",userList);

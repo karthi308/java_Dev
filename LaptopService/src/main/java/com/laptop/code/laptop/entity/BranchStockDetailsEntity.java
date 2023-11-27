@@ -14,13 +14,19 @@ import java.io.Serializable;
 public class BranchStockDetailsEntity implements Serializable {
     @Id
     @Column(name = "stock_id")
-    int stockId;
+    String stockId;
+
+    @Column(name = "intake_no")
+    String intakeNo;
+
+    @Column(name = "year")
+    String year;
 
     @Column(name = "stock_name")
     String stockName;
 
     @Column(name = "price")
-    String price;
+    int price;
 
     @Column(name = "branch_name")
     String branchName;
@@ -28,7 +34,7 @@ public class BranchStockDetailsEntity implements Serializable {
     @Column(name = "transferred_from")
     String transferredFrom;
 
-    @Column(name = "warranty_frm_date")
+    @Column(name = "warranty")
     String warranty;
 
     @Column(name = "status")

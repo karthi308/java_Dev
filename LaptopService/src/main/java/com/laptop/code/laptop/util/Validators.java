@@ -24,6 +24,11 @@ public class Validators {
             return true;
         }
         return false;
+    } public static boolean hasData(boolean data) {
+        if (data != false) {
+            return true;
+        }
+        return false;
     }
 
     public static boolean hasData(List<?> data) {

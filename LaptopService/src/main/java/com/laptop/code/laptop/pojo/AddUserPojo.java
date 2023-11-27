@@ -5,23 +5,28 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddUserPojo {
 
     private String userId;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String userName;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String pwd;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String branch;
+    private String branchName;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String mailId;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String adminAccess;
+    private boolean userModificationAccess;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private boolean switchBranchAccess;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private boolean vendorStockAccess;
+
+    private String status;
 
 }

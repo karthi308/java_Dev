@@ -7,8 +7,8 @@ import lombok.Data;
 public class CustomerDetailsPojo {
 
     private String name;
-    private String address;
-    private String city;
+    private String street;
+    private String city_village_town;
     private String state;
     private String pincode;
     private Long mobileNo;
@@ -25,19 +25,16 @@ public class CustomerDetailsPojo {
     private String model;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String SlNo;
+    private String laptopSerialNo;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String batterySlNo;
+    private String batterySerialNo;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private boolean withAdapter;
+    private String adapterSerialNo;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String adapterSlNo;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String problem;
+    private String problemReported;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String damages;
