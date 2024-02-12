@@ -1,24 +1,31 @@
-#server:
-#  servlet:
-#    contextPath: /laptop/service
-
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/karthi
-    username: postgres
-    password: postgres
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate.format_sql: true
-      hibernate.jdbc.lob.non_contextual_creation: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-  cache:
-    type: redis
-  redis:
-    host: 127.0.0.1
-    port: 6379
-
 server:
   port: 7000
+
+spring:
+  jpa:
+    hibernate:
+      show-sql: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    platform: org.postgresql.Driver
+    url: jdbc:postgresql://54.165.201.4:5432/postgres
+    username: postgres
+    password: postgres
+#  jpa:
+#    hibernate:
+#      ddl-auto: none
+#    properties:
+#      hibernate.format_sql: true
+#      hibernate.jdbc.lob.non_contextual_creation: true
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  hikari:
+    connection-timeout: 25000
+    max-lifetime: 60000
+    validation-timeout: 1000
+    max-pool-size: ${db.max.connection.pool.size:5}
+    minimum-idle: ${db.min.connection.idle.size:1}
+  data:
+    redis:
+      host: 18.234.171.20
+      port: 6379
+crossOriginUrl: http://52.87.160.9
